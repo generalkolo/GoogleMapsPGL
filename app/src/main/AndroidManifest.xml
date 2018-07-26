@@ -17,15 +17,13 @@
         <meta-data android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/key"/>
 
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activities.GetLocation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.BasicMap"></activity>
-        <activity android:name=".activities.GetLocation"></activity>
     </application>
 
 </manifest>
