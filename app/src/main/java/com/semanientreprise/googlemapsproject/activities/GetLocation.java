@@ -13,9 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -36,14 +34,17 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.semanientreprise.googlemapsproject.fragments.MapDetailsFragment;
 import com.semanientreprise.googlemapsproject.R;
+import com.semanientreprise.googlemapsproject.fragments.MapDetailsFragment;
 import com.semanientreprise.googlemapsproject.util.BaseActivity;
 
 import java.io.ByteArrayOutputStream;
 
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class GetLocation extends BaseActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener{
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private static final int LOCATION_REQUEST_CONSTANT = 1;
@@ -63,38 +64,32 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.get_location);
+        ButterKnife.bind(this);
 
-        SupportMapFragment mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.lmap);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.lmap);
 
         mapFragment.getMapAsync(this);
 
         buildClient();
-
-        initView();
     }
 
-    private void initView() {
-        im = findViewById(R.id.getLocationIB);
-        im.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takePicture();
-            }
-        });
+    @OnClick(R.id.getLocationIB)
+    public void onViewClicked() {
+        takePicture();
     }
 
     private void takePicture() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent,REQUEST_CAMERA);
+        startActivityForResult(intent, REQUEST_CAMERA);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_CHECK_SETTINGS:
-                switch (resultCode){
+                switch (resultCode) {
                     case Activity.RESULT_OK:
                         break;
                     case Activity.RESULT_CANCELED:
@@ -103,14 +98,14 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
                 }
                 break;
             case REQUEST_CAMERA:
-                switch (resultCode){
+                switch (resultCode) {
                     case Activity.RESULT_OK:
-                        if (currentLocation != null){
-                            thumbnail = (Bitmap)data.getExtras().get("data");
+                        if (currentLocation != null) {
+                            thumbnail = (Bitmap) data.getExtras().get("data");
 
-                            Bitmap cropped = Bitmap.createBitmap(thumbnail,0,0,70,70);
+                            Bitmap cropped = Bitmap.createBitmap(thumbnail, 0, 0, 70, 70);
 
-                            position = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
+                            position = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                             mMap.addMarker(new MarkerOptions().position(position).icon(BitmapDescriptorFactory.fromBitmap(cropped)));
                         }
                         break;
@@ -145,14 +140,14 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(request);
 
-        PendingResult<LocationSettingsResult> results = LocationServices.SettingsApi.checkLocationSettings(apiClient,builder.build());
+        PendingResult<LocationSettingsResult> results = LocationServices.SettingsApi.checkLocationSettings(apiClient, builder.build());
 
         results.setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
             public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
                 final Status status = locationSettingsResult.getStatus();
 
-                switch (status.getStatusCode()){
+                switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
                             status.startResolutionForResult(GetLocation.this, REQUEST_CHECK_SETTINGS);
@@ -168,9 +163,8 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
                             ActivityCompat.requestPermissions(GetLocation.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST_CONSTANT);
 
                             currentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-                        }
-                        else {
-                           currentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
+                        } else {
+                            currentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -191,7 +185,7 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         if (apiClient.isConnected())
             apiClient.disconnect();
@@ -209,7 +203,7 @@ public class GetLocation extends BaseActivity implements OnMapReadyCallback,
 
         if (mapDetailsFragment == null) {
             mapDetailsFragment = MapDetailsFragment.newInstance(String.valueOf(currentLocation.getLatitude()),
-                    String.valueOf(currentLocation.getLongitude()),byteArray);
+                    String.valueOf(currentLocation.getLongitude()), byteArray);
         }
 
         addFragmentToActivity(manager,
